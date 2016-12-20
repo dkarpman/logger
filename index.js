@@ -21,25 +21,28 @@ module.exports = dev;
 
 function dev(opts) {
   return function *logger(next) {
+    // request
+    var start = new Date ;
 
     const log_id = yield new Promise( (resolve, reject) =>crypto.randomBytes(8, (err, buffer) => resolve(buffer.toString('hex')) ) ) ;
 
     this.log_id = log_id ;
     this.log = function() {
       let args = Array.prototype.slice.call(arguments);
-      args.unshift(new Date()) ;
+      const the_time = new Date();
+      args.unshift((Number(the_time) - Number(start)) + 'ms')
+      args.unshift(the_time) ;
       args.unshift(log_id);
       console.log.apply(console, args);
     }
     this.error = function() {
       let args = Array.prototype.slice.call(arguments);
+      args.unshift((Number(the_time) - Number(start)) + 'ms')
       args.unshift(new Date()) ;
       args.unshift(log_id);
       console.error.apply(console, args);
     }
 
-    // request
-    var start = new Date ;
     this.log( 'BEG'
             , this.hasOwnProperty('request') && this.request.hasOwnProperty('ip') ? this.request.ip : '127.0.0.1'
             , '"' + (this.hasOwnProperty('request') && this.request.hasOwnProperty('header') && this.request.header.hasOwnProperty('user-agent') ? this.request.header['user-agent'] : '-') + '"'
@@ -114,7 +117,6 @@ function log(ctx, start, len, err, event) {
          , ctx.method
          , ctx.originalUrl
          , status
-         , time(start)
          , length ) ;
 }
 
