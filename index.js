@@ -24,7 +24,9 @@ function dev(opts) {
     // request
     var start = new Date ;
 
-    const log_id = yield new Promise( (resolve, reject) =>crypto.randomBytes(8, (err, buffer) => resolve(buffer.toString('hex')) ) ) ;
+    const log_id = this.hasOwnProperty('request') && this.request.header && this.request.header['x-request-uid']
+                   ? this.request.header['x-request-uid']
+                   : crypto.randomBytes(8) ;
 
     this.log_id = log_id ;
     this.log = function() {
