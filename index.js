@@ -2,16 +2,12 @@
  * Module dependencies.
  */
 
+const Promise = require('bluebird') ;
+const crypto  = require('crypto')
+
 var Counter = require('passthrough-counter');
 var humanize = require('humanize-number');
 var bytes = require('bytes');
-var chalk = require('chalk');
-
-/**
- * TTY check for dev format.
- */
-
-var isatty = process.stdout.isTTY;
 
 /**
  * Expose logger.
@@ -20,30 +16,35 @@ var isatty = process.stdout.isTTY;
 module.exports = dev;
 
 /**
- * Color map.
- */
-
-var colorCodes = {
-  5: 'red',
-  4: 'yellow',
-  3: 'cyan',
-  2: 'green',
-  1: 'green'
-};
-
-/**
  * Development logger.
  */
 
 function dev(opts) {
   return function *logger(next) {
+
+    const log_id = yield new Promise( (resolve, reject) =>crypto.randomBytes(8, (err, buffer) => resolve(buffer.toString('hex')) ) ) ;
+
+    this.log_id = log_id ;
+    this.log = function() {
+      let args = Array.prototype.slice.call(arguments);
+      args.unshift(new Date()) ;
+      args.unshift(log_id);
+      console.log.apply(console, args);
+    }
+    this.error = function() {
+      let args = Array.prototype.slice.call(arguments);
+      args.unshift(new Date()) ;
+      args.unshift(log_id);
+      console.error.apply(console, args);
+    }
+
     // request
-    var start = new Date;
-    console.log('  ' + chalk.gray('<--')
-      + ' ' + chalk.bold('%s')
-      + ' ' + chalk.gray('%s'),
-        this.method,
-        this.originalUrl);
+    var start = new Date ;
+    this.log( 'BEG'
+            , this.hasOwnProperty('request') && this.request.hasOwnProperty('ip') ? this.request.ip : '127.0.0.1'
+            , '"' + (this.hasOwnProperty('request') && this.request.hasOwnProperty('header') && this.request.header.hasOwnProperty('user-agent') ? this.request.header['user-agent'] : '-') + '"'
+            , this.method
+            , this.originalUrl);
 
     try {
       yield next;
@@ -76,7 +77,7 @@ function dev(opts) {
     res.once('finish', onfinish);
     res.once('close', onclose);
 
-    function done(event){
+    function done(event) {
       res.removeListener('finish', onfinish);
       res.removeListener('close', onclose);
       log(ctx, start, counter ? counter.length : length, null, event);
@@ -96,7 +97,6 @@ function log(ctx, start, len, err, event) {
 
   // set the color of the status code;
   var s = status / 100 | 0;
-  var color = colorCodes[s];
 
   // get the human readable response length
   var length;
@@ -105,24 +105,17 @@ function log(ctx, start, len, err, event) {
   } else if (null == len) {
     length = '-';
   } else {
-    length = bytes(len);
+    length = len // bytes(len);
   }
 
-  var upstream = err ? chalk.red('xxx')
-    : event === 'close' ? chalk.yellow('-x-')
-    : chalk.gray('-->')
-
-  console.log('  ' + upstream
-    + ' ' + chalk.bold('%s')
-    + ' ' + chalk.gray('%s')
-    + ' ' + chalk[color]('%s')
-    + ' ' + chalk.gray('%s')
-    + ' ' + chalk.gray('%s'),
-      ctx.method,
-      ctx.originalUrl,
-      status,
-      time(start),
-      length);
+  ctx.log('FIN'
+         , ctx.hasOwnProperty('request') && ctx.request.hasOwnProperty('ip') ? ctx.request.ip : '127.0.0.1'
+         , '"' + (ctx.hasOwnProperty('request') && ctx.request.hasOwnProperty('header') && ctx.request.header.hasOwnProperty('user-agent') ? ctx.request.header['user-agent'] : '-') + '"'
+         , ctx.method
+         , ctx.originalUrl
+         , status
+         , time(start)
+         , length ) ;
 }
 
 /**

@@ -26,8 +26,8 @@
   },
   "license": "MIT",
   "dependencies": {
+    "bluebird": "^3.4.6",
     "bytes": "1",
-    "chalk": "^1.0.0",
     "humanize-number": "~0.0.1",
     "passthrough-counter": "^1.0.0"
   }
