@@ -26,7 +26,7 @@ function dev(opts) {
 
     const log_id = this.hasOwnProperty('request') && this.request.header && this.request.header['x-request-uid']
                    ? this.request.header['x-request-uid']
-                   : crypto.randomBytes(8) ;
+                   : crypto.randomBytes(8).toString('hex') ;
 
     this.log_id = log_id ;
     this.log = function() {
