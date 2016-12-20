@@ -24,8 +24,8 @@ function dev(opts) {
     // request
     var start = new Date ;
 
-    const log_id = this.hasOwnProperty('request') && this.request.header && this.request.header['x-request-uid']
-                   ? this.request.header['x-request-uid']
+    const log_id = this.hasOwnProperty('request') && this.request.header && this.request.header['x-unique-id']
+                   ? this.request.header['x-unique-id']
                    : crypto.randomBytes(8).toString('hex') ;
 
     this.log_id = log_id ;
@@ -48,8 +48,9 @@ function dev(opts) {
     this.log( 'BEG'
             , this.hasOwnProperty('request') && this.request.hasOwnProperty('ip') ? this.request.ip : '127.0.0.1'
             , '"' + (this.hasOwnProperty('request') && this.request['header'] && this.request.header['user-agent'] ? this.request.header['user-agent'] : '-') + '"'
-            , this.method
-            , this.originalUrl);
+            , '"' + this.method
+            , this.originalUrl
+            , 'HTTP/' + this.req.httpVersionMajor + '.' + this.req.httpVersionMinor + '"' );
 
     try {
       yield next;
@@ -116,8 +117,9 @@ function log(ctx, start, len, err, event) {
   ctx.log('FIN'
          , ctx.hasOwnProperty('request') && ctx.request.hasOwnProperty('ip') ? ctx.request.ip : '127.0.0.1'
          , '"' + (ctx.hasOwnProperty('request') && ctx.request.hasOwnProperty('header') && ctx.request.header.hasOwnProperty('user-agent') ? ctx.request.header['user-agent'] : '-') + '"'
-         , ctx.method
+         , '"' + ctx.method
          , ctx.originalUrl
+         , 'HTTP/' + ctx.req.httpVersionMajor + '.' + ctx.req.httpVersionMinor + '"'
          , status
          , length ) ;
 }
