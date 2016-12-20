@@ -45,7 +45,7 @@ function dev(opts) {
 
     this.log( 'BEG'
             , this.hasOwnProperty('request') && this.request.hasOwnProperty('ip') ? this.request.ip : '127.0.0.1'
-            , '"' + (this.hasOwnProperty('request') && this.request.hasOwnProperty('header') && this.request.header.hasOwnProperty('user-agent') ? this.request.header['user-agent'] : '-') + '"'
+            , '"' + (this.hasOwnProperty('request') && this.request['header'] && this.request.header['user-agent'] ? this.request.header['user-agent'] : '-') + '"'
             , this.method
             , this.originalUrl);
 
@@ -118,18 +118,4 @@ function log(ctx, start, len, err, event) {
          , ctx.originalUrl
          , status
          , length ) ;
-}
-
-/**
- * Show the response time in a human readable format.
- * In milliseconds if less than 10 seconds,
- * in seconds otherwise.
- */
-
-function time(start) {
-  var delta = new Date - start;
-  delta = delta < 10000
-    ? delta + 'ms'
-    : Math.round(delta / 1000) + 's';
-  return humanize(delta);
 }
