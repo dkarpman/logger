@@ -39,6 +39,7 @@ function dev(opts) {
     }
     this.error = function() {
       let args = Array.prototype.slice.call(arguments);
+      const the_time = new Date();
       args.unshift((Number(the_time) - Number(start)) + 'ms')
       args.unshift(new Date()) ;
       args.unshift(log_id);
