@@ -2,6 +2,8 @@
  * Module dependencies.
  */
 
+'use strict'
+
 const Promise = require('bluebird') ;
 const crypto  = require('crypto')
 
